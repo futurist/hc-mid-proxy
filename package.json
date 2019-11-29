@@ -1,0 +1,17 @@
+{
+  "name": "hc-mid-proxy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "James Yang <26634873@qq.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "http-proxy-middleware": "^0.20.0",
+    "path-to-regexp": "^1.6.0"
+  }
+}
