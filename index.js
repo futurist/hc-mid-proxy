@@ -41,11 +41,17 @@ module.exports = (app, config) => {
                 return targetUrl
             },
             onProxyReq: function onProxyReq(proxyReq, req, res) {
-                debug('Proxy:', proxyReq.method, endpoint, proxyReq.path)
                 const headers = calculateHeaderExtension(req, config)
                 Object.keys(headers).map(k => {
-                    proxyReq.setHeader(k, headers[k])
+                    const v = headers[k]
+                    if(v==null) {
+                        proxyReq.removeHeader(k)
+                    } else {
+                        proxyReq.setHeader(k, v)
+                    }
                 })
+                debug('Proxy:', proxyReq.method, endpoint, proxyReq.path)
+                debug('Headers:', proxyReq.getHeaders())
             },
             target: endpoint
         })
