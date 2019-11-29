@@ -3,6 +3,11 @@ const proxy = require('http-proxy-middleware')
 const debug = require('debug')('hc-mid-proxy')
 const pathToRegexp = require('path-to-regexp')
 
+/**
+ * NOTICE: this middleware should be placed BEFORE body-parser
+ * SEE: https://github.com/chimurai/http-proxy-middleware/issues/40
+ */
+
 module.exports = (app, config) => {
     let { prefix: appPrefix } = app.options
     appPrefix = appPrefix === '/' ? '' : appPrefix

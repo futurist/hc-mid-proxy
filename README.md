@@ -11,11 +11,18 @@ npm i -S hc-mid-proxy
 
 ## Usage
 
+**NOTICE**: this middleware should be placed BEFORE body-parser
+
+**SEE**: https://github.com/chimurai/http-proxy-middleware/issues/40
+
 In your `config_default.js`, add below line:
 
 ```js
 config = {
     middleware: {
+        bodyParser: {
+            deps: 'proxy'
+        },
         proxy: {
             enable: true,
             module: 'hc-mid-proxy',
