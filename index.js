@@ -7,47 +7,60 @@ module.exports = (app, config) => {
     let { prefix: appPrefix } = app.options
     appPrefix = appPrefix === '/' ? '' : appPrefix
 
-    config = {
-        headerExtension: [],
-        api: ['*'],
-        ...config
+    let {routes} = config
+    if(!Array.isArray(routes)) {
+        routes = [{...config}]
     }
-    const {prefix, endpoint, api} = config
-
-    assert.ok(prefix && endpoint, '[hc-proxy-middleware]: Both "prefix" and "endpoint" cannot be empty!')
-
-    const filter = function(pathname, req) {
-        if(!req.path.startsWith(prefix)) {
-            return
+    const middlewareRoutes = routes.map(config=>{
+        config = {
+            headerExtension: [],
+            api: ['*'],
+            ...config
         }
-        const testPath = ensureSlash(req.path.replace(prefix, ''))
-        const match = getMatchedPath(api, testPath)
-        // console.log('match path:', testPath, match)
-        return match
-    }
+        const {prefix, endpoint, api} = config
 
-    const middleware = proxy(filter, {
-        ws: true,
-        // ignorePath: true,
-        changeOrigin: true,
-        pathRewrite: function (path, req) {
-            const base = appPrefix + prefix
-            const targetUrl = path.replace(base, '')
-            return targetUrl
-        },
-        onProxyReq: function onProxyReq(proxyReq, req, res) {
-            const headers = calculateHeaderExtension(req, config)
-            Object.keys(headers).map(k => {
-                proxyReq.setHeader(k, headers[k])
-            })
-        },
-        target: endpoint
+        assert.ok(prefix && endpoint, `[hc-proxy-middleware]: route ${prefix} - both "prefix" and "endpoint" cannot be empty!`)
+
+        const filter = function(pathname, req) {
+            if(!req.path.startsWith(prefix)) {
+                return
+            }
+            const testPath = ensureSlash(req.path.replace(prefix, ''))
+            const match = getMatchedPath(api, testPath)
+            // console.log('match path:', testPath, match)
+            return match
+        }
+
+        const middleware = proxy(filter, {
+            ws: true,
+            // ignorePath: true,
+            changeOrigin: true,
+            pathRewrite: function (path, req) {
+                const base = appPrefix + prefix
+                const targetUrl = path.replace(base, '')
+                return targetUrl
+            },
+            onProxyReq: function onProxyReq(proxyReq, req, res) {
+                debug('Proxy:', proxyReq.method, endpoint, proxyReq.path)
+                const headers = calculateHeaderExtension(req, config)
+                Object.keys(headers).map(k => {
+                    proxyReq.setHeader(k, headers[k])
+                })
+            },
+            target: endpoint
+        })
+        return {
+            config,
+            filter,
+            middleware
+        }
     })
 
     return (req, res, next) => {
-        if(filter(req.path, req)) {
-            debug('[hc-mid-proxy]', req.path)
-            middleware(req, res)
+        const matchedRoute = middlewareRoutes.find(({filter})=>filter(req.path, req))
+        if(matchedRoute) {
+            debug(matchedRoute.config.prefix, '=>', req.path)
+            matchedRoute.middleware(req, res)
         } else {
             next()
         }
