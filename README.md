@@ -65,3 +65,17 @@ config = {
 ```
 
 Notice both `prefix` and `endpoint` can omit the suffix `/`.
+
+The `api: []` can include below format:
+
+```js
+{
+    path: '/abc',
+    method: 'get|post',
+    onRequest: req=>{
+        // Throw error when validate failed
+        throw 'Validate failed'
+    }
+}
+```
+
