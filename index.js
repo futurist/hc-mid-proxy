@@ -1,3 +1,5 @@
+const _ = require('lodash')
+const url = require('url')
 const assert = require('assert')
 const proxy = require('http-proxy-middleware')
 const debug = require('debug')('hc-mid-proxy')
@@ -12,7 +14,7 @@ module.exports = (app, config) => {
     let { prefix: appPrefix } = app.options
     appPrefix = appPrefix === '/' ? '' : appPrefix
 
-    let {routes} = config
+    let {routes, init} = config
     if(!Array.isArray(routes)) {
         routes = [{...config}]
     }
@@ -22,18 +24,23 @@ module.exports = (app, config) => {
             api: ['*'],
             ...config
         }
-        const {prefix, endpoint, api} = config
+        const {prefix, endpoint, api, proxyOptions} = config
 
-        assert.ok(prefix && endpoint, `[hc-proxy-middleware]: route ${prefix} - both "prefix" and "endpoint" cannot be empty!`)
+        assert.ok(prefix && endpoint, `[hc-mid-proxy]: route ${prefix} - both "prefix" and "endpoint" cannot be empty!`)
 
-        const filter = function(pathname, req) {
-            if(!req.path.startsWith(prefix)) {
+        const filter = config.filter || function(path, req) {
+            const {pathname} = url.parse(req.url)
+            if(!pathname.startsWith(prefix)) {
                 return
             }
-            const testPath = ensureSlash(req.path.replace(prefix, ''))
-            const match = getMatchedPath(api, testPath)
-            // console.log('match path:', testPath, match)
-            return match
+            const testPath = ensureSlash(pathname.replace(prefix, ''))
+            try {
+                const match = getMatchedPath(api, req, testPath)
+                // console.log('match path:', testPath, match)
+                return match
+            } catch(e) {
+                console.log('[hc-mid-proxy]match path error: ', e)
+            }
         }
 
         const middleware = proxy(filter, {
@@ -58,7 +65,8 @@ module.exports = (app, config) => {
                 debug('Proxy:', proxyReq.method, endpoint, proxyReq.path)
                 debug('Headers:', proxyReq.getHeaders())
             },
-            target: endpoint
+            target: endpoint,
+            ...proxyOptions
         })
         return {
             config,
@@ -66,6 +74,10 @@ module.exports = (app, config) => {
             middleware
         }
     })
+
+    if(init) {
+        init(middlewareRoutes, config)
+    }
 
     return (req, res, next) => {
         const matchedRoute = middlewareRoutes.find(({filter})=>filter(req.path, req))
@@ -82,13 +94,27 @@ function ensureSlash(pathname){
     return pathname[0] === '/' ? pathname : '/' + pathname
 }
 
-function getMatchedPath(testArray, testPath) {
+function getMatchedPath(testArray, req, testPath) {
     let match
     const entry = testArray.find(entry => {
       if (!entry) return
+      if(_.isObject(entry)) {
+          entry = entry.path
+      }
       match = pathToRegexp(entry).exec(testPath)
       return match
     })
+    if(_.isObject(entry)) {
+        let {method = '*', onRequest} = entry
+        if(typeof method === 'string') {
+            method = method.split(/\s*\|\s*/)
+        }
+        const allowMethods = [].concat(method).map(v => String(v).toLowerCase())
+        if(allowMethods.indexOf('*') < 0 && allowMethods.indexOf(req.method.toLowerCase()) < 0) {
+            return
+        }
+        onRequest && onRequest(req)
+    }
     return entry
 }
 
