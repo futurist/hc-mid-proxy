@@ -1,3 +1,10 @@
+<a name="v1.0.3"></a>
+## [v1.0.3](/compare/v1.0.2...v1.0.3) (2019-12-4 17:17:52)
+
+- add object of path support  [ab58208](/commit/ab58208)
+- update docs  [d3d3459](/commit/d3d3459)
+
+
 <a name="v1.0.2"></a>
 ## [v1.0.2](/compare/v1.0.1...v1.0.2) (2019-11-29 12:07:16)
 
