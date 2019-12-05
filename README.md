@@ -30,14 +30,14 @@ config = {
                 prefix: '/api/proxy/abc/',
                 endpoint: 'http://backend.host:8888/abc/',
                 headerExtension: [],
-                api: ['*']
+                api: ['/abc']
             }
         }
     }
 }
 ```
 
-Default value of `headerExtension` is `[]`, and `api` is `['*']`, when omitted.
+Default value of `headerExtension` is `[]`, and `api` is `[]`, when omitted.
 
 When want to proxy many routes, using `routes` format as below:
 
@@ -52,10 +52,16 @@ config = {
                     {
                         prefix: '/api/proxy1',
                         endpoint: 'http://backend.host:8888',
+                        api: [
+                            '/abc'
+                        ]
                     },
                     {
                         prefix: '/api/proxy2',
                         endpoint: 'http://backend.host:9999',
+                        api: [
+                            '/abc'
+                        ]
                     },
                 ]
             }

@@ -20,8 +20,9 @@ module.exports = (app, config) => {
     }
     const middlewareRoutes = routes.map(config=>{
         config = {
+            _debugMode,
             headerExtension: [],
-            api: ['*'],
+            api: [],
             ...config
         }
         const {prefix, endpoint, api, proxyOptions} = config
@@ -35,7 +36,7 @@ module.exports = (app, config) => {
             }
             const testPath = ensureSlash(pathname.replace(prefix, ''))
             try {
-                const match = getMatchedPath(api, req, testPath)
+                const match = getMatchedPath(api, req, testPath, config)
                 // console.log('match path:', testPath, match)
                 return match
             } catch(e) {
@@ -94,7 +95,7 @@ function ensureSlash(pathname){
     return pathname[0] === '/' ? pathname : '/' + pathname
 }
 
-function getMatchedPath(testArray, req, testPath) {
+function getMatchedPath(testArray, req, testPath, config) {
     let match
     const entry = testArray.find(entry => {
       if (!entry) return
@@ -110,7 +111,11 @@ function getMatchedPath(testArray, req, testPath) {
             method = method.split(/\s*\|\s*/)
         }
         const allowMethods = [].concat(method).map(v => String(v).toLowerCase())
-        if(allowMethods.indexOf('*') < 0 && allowMethods.indexOf(req.method.toLowerCase()) < 0) {
+        const allowAllMethods = _debugMode && allowMethods.indexOf('*') > 0
+        if(allowAllMethods) {
+            console.warn(`WARNING: _debugMode enabled for ${config.prefix}!\nShould be removed in production!`)
+        }
+        if(!allowAllMethods && allowMethods.indexOf(req.method.toLowerCase()) < 0) {
             return
         }
         onRequest && onRequest(req)
