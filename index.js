@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const url = require('url')
 const assert = require('assert')
+const methods = require('methods')
 const proxy = require('http-proxy-middleware')
 const debug = require('debug')('hc-mid-proxy')
 const pathToRegexp = require('path-to-regexp')
@@ -103,7 +104,7 @@ function getMatchedPath(testArray, req, testPath, config) {
       return match
     })
     if(_.isObject(entry)) {
-        let {method = '*', onRequest} = entry
+        let {method = methods, onRequest} = entry
         if(typeof method === 'string') {
             method = method.split(/\s*\|\s*/)
         }
