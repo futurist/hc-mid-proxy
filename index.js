@@ -108,7 +108,7 @@ function getMatchedPath(testArray, req, testPath, config) {
             method = method.split(/\s*\|\s*/)
         }
         const allowMethods = [].concat(method).map(v => String(v).toLowerCase())
-        const allowAllMethods = _debugMode && allowMethods.indexOf('*') > 0
+        const allowAllMethods = config._debugMode && allowMethods.indexOf('*') > 0
         if(allowAllMethods) {
             console.warn(`WARNING: _debugMode enabled for ${config.prefix}!\nShould be removed in production!`)
         }
