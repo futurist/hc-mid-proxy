@@ -15,10 +15,7 @@ module.exports = (app, config) => {
     appPrefix = appPrefix === '/' ? '' : appPrefix
 
     let {routes, init} = config
-    if(!Array.isArray(routes)) {
-        routes = [{...config}]
-    }
-    const middlewareRoutes = routes.map(config=>{
+    const middlewareRoutes = _.map(routes, config=>{
         config = {
             _debugMode: false,
             headerExtension: [],
