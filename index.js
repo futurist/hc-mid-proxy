@@ -20,7 +20,7 @@ module.exports = (app, config) => {
     }
     const middlewareRoutes = routes.map(config=>{
         config = {
-            _debugMode,
+            _debugMode: false,
             headerExtension: [],
             api: [],
             ...config
