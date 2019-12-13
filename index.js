@@ -11,11 +11,20 @@ const pathToRegexp = require('path-to-regexp')
  * SEE: https://github.com/chimurai/http-proxy-middleware/issues/40
  */
 
+const logPrefix = `[hc-mid-proxy]:`
+
 module.exports = (app, config) => {
     let { prefix: appPrefix } = app.options
     appPrefix = appPrefix === '/' ? '' : appPrefix
 
     let {routes, init} = config
+    if(!routes) {
+        routes = {
+            default: {...config}
+        }
+        console.warn(`${logPrefix} Use whole config as default routes!`)
+    }
+
     const middlewareRoutes = _.map(routes, config=>{
         config = {
             _debugMode: false,
@@ -25,7 +34,7 @@ module.exports = (app, config) => {
         }
         const {prefix, endpoint, api, proxyOptions} = config
 
-        assert.ok(prefix && endpoint, `[hc-mid-proxy]: route ${prefix} - both "prefix" and "endpoint" cannot be empty!`)
+        assert.ok(prefix && endpoint, `${logPrefix} route ${prefix} - both "prefix" and "endpoint" cannot be empty!`)
 
         const filter = config.filter || function(path, req) {
             const {pathname} = url.parse(req.url)
@@ -38,7 +47,7 @@ module.exports = (app, config) => {
                 // console.log('match path:', testPath, match)
                 return match
             } catch(e) {
-                console.log('[hc-mid-proxy]match path error: ', e)
+                console.log(logPrefix + 'match path error: ', e)
             }
         }
 
