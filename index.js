@@ -25,6 +25,12 @@ module.exports = (app, config) => {
         console.warn(`${logPrefix} Use whole config as default routes!`)
     }
 
+    // check bodyParse deps
+    const mountedMiddleware = _.get(app, 'plugins.mountedMiddleware', [])
+    if(mountedMiddleware.indexOf('bodyParser') > -1) {
+        throw new Error(`middleware bodyParser must AFTER ${logPrefix} try add {"deps": "proxy"} inside "bodyParser"`)
+    }
+
     const middlewareRoutes = _.map(routes, config=>{
         config = {
             _debugMode: false,
