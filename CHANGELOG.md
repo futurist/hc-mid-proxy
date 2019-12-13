@@ -1,3 +1,9 @@
+<a name="v1.0.10"></a>
+## [v1.0.10](/compare/v1.0.9...v1.0.10) (2019-12-13 15:42:43)
+
+- Use whole config as default routes  [fb7c534](/commit/fb7c534)
+
+
 <a name="v1.0.9"></a>
 ## [v1.0.9](/compare/v1.0.8...v1.0.9) (2019-12-6 20:21:48)
 
