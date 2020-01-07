@@ -48,22 +48,22 @@ config = {
             enable: true,
             module: 'hc-mid-proxy',
             config: { 
-                routes: [
-                    {
+                routes: {
+                    proxy1: {
                         prefix: '/api/proxy1',
                         endpoint: 'http://backend.host:8888',
                         api: [
                             '/abc'
                         ]
                     },
-                    {
+                    proxy2: {
                         prefix: '/api/proxy2',
                         endpoint: 'http://backend.host:9999',
                         api: [
                             '/abc'
                         ]
                     },
-                ]
+                }
             }
         }
     }
